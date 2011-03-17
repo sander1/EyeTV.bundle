@@ -1,0 +1,15 @@
+[
+  {
+    "id":"eyetv_host",
+    "label":"EyeTV host:port",
+    "type":"text",
+    "default":"192.168.1.50:2170"
+  },
+  {
+    "id":"livetv_bandwidth",
+    "label":"Bandwidth for Live TV",
+    "type":"enum",
+    "values":["80", "300", "1500", "2000"],
+    "default":"1500"
+  }
+]
