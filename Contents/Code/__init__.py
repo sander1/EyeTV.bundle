@@ -8,7 +8,6 @@
 #   PMS (which can be "localhost") and once for accessing it from the iOS device (in case we
 #   want to set a dynamic hostname to connect to home, this can never be "localhost" (except when
 #   tunneling over SSH) -- my brain hurts)
-# - Add option to access recordings
 # - Pick some logical default bandwidth values
 # - Make a fresh pot of coffee
 #
@@ -16,16 +15,20 @@
 
 import time
 
-TITLE        = 'EyeTV'
-PREFIX       = '/video/eyetv'
-ICON_DEFAULT = 'icon-default.png'
-ICON_PREFS   = 'icon-prefs.png'
+TITLE          = 'EyeTV'
+PREFIX         = '/video/eyetv'
+ICON_DEFAULT   = 'icon-default.png'
+ICON_PREFS     = 'icon-prefs.png'
 
-STATUS_URL   = 'http://%s/live/status'
-CHANNELS_URL = 'http://%s/live/channels'
-TUNETO_URL   = 'http://%s/live/tuneto/1/%s/%s/_SAFARI_PLAYER'
-STREAM_URL   = 'http://%s/live/stream/%s'
-READY_URL    = 'http://%s/live/ready'
+STATUS_URL     = 'http://%s/live/status'
+CHANNELS_URL   = 'http://%s/live/channels'
+TUNETO_URL     = 'http://%s/live/tuneto/1/%s/%s/_SAFARI_PLAYER'
+STREAM_URL     = 'http://%s/live/stream/%s'
+READY_URL      = 'http://%s/live/ready'
+
+RECORDINGS_URL = 'http://%s/live/recordings/0/0/-1/-1/-date/_REC_WIFIACCESS'
+VIDEO_URL      = 'http://%s/live/recordingFile/%d/refmovie.mov'
+VIDEO_THUMB    = 'http://%s/live/thumbnail/0/%d'
 
 ####################################################################################################
 
@@ -35,7 +38,7 @@ def Start():
 
   ObjectContainer.title1 = TITLE
   ObjectContainer.content = ContainerContent.GenericVideos
-  ObjectContainer.viewGroup = 'List'
+  ObjectContainer.view_group = 'List'
 
   DirectoryObject.thumb = R(ICON_DEFAULT)
   VideoClipObject.thumb  = R(ICON_DEFAULT)
@@ -53,7 +56,7 @@ def MainMenu():
     status = JSON.ObjectFromURL(STATUS_URL % Prefs['eyetv_host'])
     if status['isUp']:
       oc.add(DirectoryObject(key=Callback(Live), title='Live TV'))
-      #oc.add(DirectoryObject(key=Callback(Recordings), title='Recordings'))
+      oc.add(DirectoryObject(key=Callback(Recordings), title='Recordings'))
     else:
       oc.header = TITLE
       oc.message = 'EyeTV is not running'
@@ -75,7 +78,7 @@ def Live():
       items = [
         MediaObject(
           parts = [
-            PartObject(key=Callback(PlayVideo, serviceID=channel['serviceID']))
+            PartObject(key=Callback(PlayLiveVideo, serviceID=channel['serviceID']))
           ],
           protocols = [Protocol.HTTPLiveStreaming],
           platforms = [ClientPlatform.iOS],
@@ -89,7 +92,40 @@ def Live():
 
 ####################################################################################################
 
-def PlayVideo(serviceID):
+def Recordings():
+  oc = ObjectContainer()
+  for recording in JSON.ObjectFromURL(RECORDINGS_URL % Prefs['eyetv_host'])['recordings']:
+    if 'Reencoded Variants' in recording and 'iPhone' in recording['Reencoded Variants']:
+      title = recording['info']['recording title']
+      subtitle = recording['info']['episode title']
+      duration = int( recording['actual duration']*1000 )
+      id = recording['id']
+      thumb = VIDEO_THUMB % (Prefs['eyetv_host'], id)
+      url = VIDEO_URL % (Prefs['eyetv_host'], id)
+
+      oc.add(VideoClipObject(
+        title = title,
+        subtitle = subtitle,
+        thumb = thumb,
+        items = [
+          MediaObject(
+            parts = [
+              PartObject(key=url)
+            ],
+            protocols = [Protocol.HTTPMP4Streaming],
+            platforms = [ClientPlatform.iOS],
+            video_codec = VideoCodec.H264,
+            audio_codec = AudioCodec.AAC,
+            duration = duration
+          )
+        ]
+      ))
+
+  return oc
+
+####################################################################################################
+
+def PlayLiveVideo(serviceID):
   time.sleep(3) # Don't act too fast, especially not when switching streams
   tune = JSON.ObjectFromURL(TUNETO_URL % (Prefs['eyetv_host'], Prefs['livetv_bandwidth'], serviceID))
 
