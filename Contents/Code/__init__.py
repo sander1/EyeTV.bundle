@@ -81,7 +81,7 @@ def Live():
             PartObject(key=Callback(PlayLiveVideo, serviceID=channel['serviceID']))
           ],
           protocols = [Protocol.HTTPLiveStreaming],
-          platforms = [ClientPlatform.iOS],
+          platforms = [ClientPlatform.iOS, ClientPlatform.Android],
           video_codec = VideoCodec.H264,
           audio_codec = AudioCodec.AAC
         )
@@ -113,7 +113,7 @@ def Recordings():
               PartObject(key=url)
             ],
             protocols = [Protocol.HTTPMP4Streaming],
-            platforms = [ClientPlatform.iOS],
+            platforms = [ClientPlatform.iOS, ClientPlatform.Android],
             video_codec = VideoCodec.H264,
             audio_codec = AudioCodec.AAC,
             duration = duration
