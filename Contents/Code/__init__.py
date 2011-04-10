@@ -1,15 +1,15 @@
 ####################################################################################################
 #
 # EyeTV plugin for Plex for iOS, by sander1
-# v1: 17 Mar 2011
+# v1.0: 17 Mar 2011
+# v1.1: 10 Apr 2011
 #
 # TODO:
 # - Think if we need to be able to set the location of EyeTV twice: once for accessing it from
 #   PMS (which can be "localhost") and once for accessing it from the iOS device (in case we
 #   want to set a dynamic hostname to connect to home, this can never be "localhost" (except when
 #   tunneling over SSH) -- my brain hurts)
-# - Pick some logical default bandwidth values
-# - Make a fresh pot of coffee
+# - Make another fresh pot of coffee
 #
 ####################################################################################################
 
@@ -22,16 +22,15 @@ ICON_PREFS     = 'icon-prefs.png'
 
 STATUS_URL     = 'http://%s/live/status'
 CHANNELS_URL   = 'http://%s/live/channels'
-TUNETO_URL     = 'http://%s/live/tuneto/1/%s/%s/_SAFARI_PLAYER'
-STREAM_URL     = 'http://%s/live/stream/%s'
+TUNETO_URL     = 'http://%s/live/tuneto/1/%%s/%%s/_SAFARI_PLAYER'
+STREAM_URL     = 'http://%s/live/stream/%%s'
 READY_URL      = 'http://%s/live/ready'
 
 RECORDINGS_URL = 'http://%s/live/recordings/0/0/-1/-1/-date/_REC_WIFIACCESS'
-VIDEO_URL      = 'http://%s/live/recordingFile/%d/refmovie.mov'
-VIDEO_THUMB    = 'http://%s/live/thumbnail/0/%d'
+VIDEO_URL      = 'http://%s/live/recordingFile/%%d/refmovie.mov'
+VIDEO_THUMB    = 'http://%s/live/thumbnail/0/%%d'
 
 ####################################################################################################
-
 def Start():
   Plugin.AddPrefixHandler(PREFIX, MainMenu, TITLE, ICON_DEFAULT)
   Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
@@ -48,12 +47,11 @@ def Start():
   HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_6; en-us) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27'
 
 ####################################################################################################
-
 def MainMenu():
   oc = ObjectContainer(noCache=True)
 
   try:
-    status = JSON.ObjectFromURL(STATUS_URL % Prefs['eyetv_host'])
+    status = JSON.ObjectFromURL(BuildUrl(STATUS_URL))
     if status['isUp']:
       oc.add(DirectoryObject(key=Callback(Live), title='Live TV'))
       oc.add(DirectoryObject(key=Callback(Recordings), title='Recordings'))
@@ -69,10 +67,9 @@ def MainMenu():
   return oc
 
 ####################################################################################################
-
 def Live():
   oc = ObjectContainer(noCache=True)
-  for channel in JSON.ObjectFromURL(CHANNELS_URL % Prefs['eyetv_host'])['channelList']:
+  for channel in JSON.ObjectFromURL(BuildUrl(CHANNELS_URL))['channelList']:
     oc.add(VideoClipObject(
       title = channel['name'],
       items = [
@@ -91,17 +88,16 @@ def Live():
   return oc
 
 ####################################################################################################
-
 def Recordings():
   oc = ObjectContainer()
-  for recording in JSON.ObjectFromURL(RECORDINGS_URL % Prefs['eyetv_host'])['recordings']:
+  for recording in JSON.ObjectFromURL(BuildUrl(RECORDINGS_URL))['recordings']:
     if 'Reencoded Variants' in recording and 'iPhone' in recording['Reencoded Variants']:
       title = recording['info']['recording title']
       subtitle = recording['info']['episode title']
       duration = int( recording['actual duration']*1000 )
       id = recording['id']
-      thumb = VIDEO_THUMB % (Prefs['eyetv_host'], id)
-      url = VIDEO_URL % (Prefs['eyetv_host'], id)
+      thumb = BuildUrl(VIDEO_THUMB) % id
+      url = BuildUrl(VIDEO_URL) % id
 
       oc.add(VideoClipObject(
         title = title,
@@ -124,19 +120,18 @@ def Recordings():
   return oc
 
 ####################################################################################################
-
 def PlayLiveVideo(serviceID):
   time.sleep(3) # Don't act too fast, especially not when switching streams
-  tune = JSON.ObjectFromURL(TUNETO_URL % (Prefs['eyetv_host'], Prefs['livetv_bandwidth'], serviceID))
+  tune = JSON.ObjectFromURL(BuildUrl(TUNETO_URL) % serviceID)
 
   if tune['success']:
-    url = STREAM_URL % (Prefs['eyetv_host'], tune['m3u8URL'])
+    url = BuildUrl(STREAM_URL) % tune['m3u8URL']
     ready = False
     i = 0
 
     while not ready:
       i = i + 1
-      ready = JSON.ObjectFromURL(READY_URL % Prefs['eyetv_host'])['isReadyToStream']
+      ready = JSON.ObjectFromURL(BuildUrl(READY_URL))['isReadyToStream']
       if not ready:
         if i == 30:
           break
@@ -146,3 +141,8 @@ def PlayLiveVideo(serviceID):
         return Redirect(url)
 
   return
+
+####################################################################################################
+def BuildUrl(url):
+  url = url % ':'.join([ Prefs['eyetv_host'], Prefs['eyetv_port'] ])
+  return url
