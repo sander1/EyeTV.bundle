@@ -122,7 +122,7 @@ def Recordings():
 ####################################################################################################
 def PlayLiveVideo(serviceID):
   time.sleep(3) # Don't act too fast, especially not when switching streams
-  tune = JSON.ObjectFromURL(BuildUrl(TUNETO_URL) % serviceID)
+  tune = JSON.ObjectFromURL(BuildUrl(TUNETO_URL) % (Prefs['livetv_bandwidth'], serviceID))
 
   if tune['success']:
     url = BuildUrl(STREAM_URL) % tune['m3u8URL']
