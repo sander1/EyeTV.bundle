@@ -33,11 +33,10 @@ VIDEO_THUMB    = 'http://%s/live/thumbnail/0/%%d'
 ####################################################################################################
 def Start():
   Plugin.AddPrefixHandler(PREFIX, MainMenu, TITLE, ICON_DEFAULT)
-  Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
+  Plugin.AddViewGroup('List', viewMode='List', mediaType='videos')
 
   ObjectContainer.title1 = TITLE
   ObjectContainer.content = ContainerContent.GenericVideos
-  ObjectContainer.view_group = 'List'
 
   DirectoryObject.thumb = R(ICON_DEFAULT)
   VideoClipObject.thumb  = R(ICON_DEFAULT)
@@ -68,7 +67,7 @@ def MainMenu():
 
 ####################################################################################################
 def Live():
-  oc = ObjectContainer(noCache=True)
+  oc = ObjectContainer(noCache=True, view_group='List')
   for channel in JSON.ObjectFromURL(BuildUrl(CHANNELS_URL))['channelList']:
     oc.add(VideoClipObject(
       title = channel['name'],
@@ -89,7 +88,7 @@ def Live():
 
 ####################################################################################################
 def Recordings():
-  oc = ObjectContainer()
+  oc = ObjectContainer(view_group='List')
   for recording in JSON.ObjectFromURL(BuildUrl(RECORDINGS_URL))['recordings']:
     if 'Reencoded Variants' in recording and 'iPhone' in recording['Reencoded Variants']:
       title = recording['info']['recording title']
