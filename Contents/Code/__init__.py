@@ -144,4 +144,5 @@ def PlayLiveVideo(serviceID):
 ####################################################################################################
 def BuildUrl(url):
   url = url % ':'.join([ Prefs['eyetv_host'], Prefs['eyetv_port'] ])
+  Log(' --> BuildUrl return value: ' + url)
   return url
