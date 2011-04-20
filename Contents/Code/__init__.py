@@ -29,11 +29,11 @@ def Start():
   Plugin.AddPrefixHandler(PREFIX, MainMenu, TITLE, ICON_DEFAULT)
   Plugin.AddViewGroup('List', viewMode='List', mediaType='videos')
 
-  ObjectContainer.title1 = TITLE
+#  ObjectContainer.title1 = TITLE
   ObjectContainer.content = ContainerContent.GenericVideos
 
   DirectoryObject.thumb = R(ICON_DEFAULT)
-  VideoClipObject.thumb  = R(ICON_DEFAULT)
+#  VideoClipObject.thumb  = R(ICON_DEFAULT)
 
   # Low cachetime because of changing m3u8 urls
   HTTP.CacheTime = 1
