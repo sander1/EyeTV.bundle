@@ -3,13 +3,7 @@
 # EyeTV plugin for Plex for iOS, by sander1
 # v1.0: 17 Mar 2011
 # v1.1: 10 Apr 2011
-#
-# TODO:
-# - Think if we need to be able to set the location of EyeTV twice: once for accessing it from
-#   PMS (which can be "localhost") and once for accessing it from the iOS device (in case we
-#   want to set a dynamic hostname to connect to home, this can never be "localhost" (except when
-#   tunneling over SSH) -- my brain hurts)
-# - Make another fresh pot of coffee
+# v1.2: 20 Apr 2011
 #
 ####################################################################################################
 
@@ -95,8 +89,8 @@ def Recordings():
       subtitle = recording['info']['episode title']
       duration = int( recording['actual duration']*1000 )
       id = recording['id']
-      thumb = BuildUrl(VIDEO_THUMB) % id
-      url = BuildUrl(VIDEO_URL) % id
+      thumb = BuildUrl(VIDEO_THUMB, True) % id
+      url = BuildUrl(VIDEO_URL, True) % id
 
       oc.add(VideoClipObject(
         title = title,
@@ -124,7 +118,7 @@ def PlayLiveVideo(serviceID):
   tune = JSON.ObjectFromURL(BuildUrl(TUNETO_URL) % (Prefs['livetv_bandwidth'], serviceID))
 
   if tune['success']:
-    url = BuildUrl(STREAM_URL) % tune['m3u8URL']
+    url = BuildUrl(STREAM_URL, True) % tune['m3u8URL']
     ready = False
     i = 0
 
@@ -142,7 +136,11 @@ def PlayLiveVideo(serviceID):
   return
 
 ####################################################################################################
-def BuildUrl(url):
-  url = url % ':'.join([ Prefs['eyetv_host'], Prefs['eyetv_port'] ])
-  Log(' --> BuildUrl return value: ' + url)
+def BuildUrl(url, seen_from_ios=False):
+  if seen_from_ios:
+    url = url % ':'.join([ Prefs['eyetv_host_ios'], Prefs['eyetv_port_ios'] ])
+  else:
+    url = url % ':'.join([ Prefs['eyetv_host_pms'], Prefs['eyetv_port_pms'] ])
+
+  Log(' --> BuildUrl return value: ' + url + ' (seen from iOS: ' + str(seen_from_ios) + ')')
   return url
