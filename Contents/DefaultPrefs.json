@@ -1,13 +1,25 @@
 [
   {
-    "id":"eyetv_host",
-    "label":"EyeTV Host",
+    "id":"eyetv_host_pms",
+    "label":"EyeTV host as seen from PMS",
+    "type":"text",
+    "default":"localhost"
+  },
+  {
+    "id":"eyetv_port_pms",
+    "label":"EyeTV port as seen from PMS",
+    "type":"text",
+    "default":"2170"
+  },
+  {
+    "id":"eyetv_host_ios",
+    "label":"EyeTV host as seen from iOS device",
     "type":"text",
     "default":"192.168.1.50"
   },
   {
-    "id":"eyetv_port",
-    "label":"EyeTV Port",
+    "id":"eyetv_port_ios",
+    "label":"EyeTV port as seen from iOS device",
     "type":"text",
     "default":"2170"
   },
