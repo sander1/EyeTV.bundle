@@ -41,7 +41,8 @@ def Start():
 
 ####################################################################################################
 def MainMenu():
-  oc = ObjectContainer(noCache=True)
+#  oc = ObjectContainer(noCache=True)
+  oc = ObjectContainer()
 
   try:
     status = JSON.ObjectFromURL(BuildUrl(STATUS_URL))
@@ -61,7 +62,8 @@ def MainMenu():
 
 ####################################################################################################
 def Live():
-  oc = ObjectContainer(noCache=True, view_group='List')
+#  oc = ObjectContainer(noCache=True, view_group='List')
+  oc = ObjectContainer()
   for channel in JSON.ObjectFromURL(BuildUrl(CHANNELS_URL))['channelList']:
     oc.add(VideoClipObject(
       title = channel['name'],
@@ -82,7 +84,8 @@ def Live():
 
 ####################################################################################################
 def Recordings():
-  oc = ObjectContainer(view_group='List')
+#  oc = ObjectContainer(view_group='List')
+  oc = ObjectContainer()
   for recording in JSON.ObjectFromURL(BuildUrl(RECORDINGS_URL))['recordings']:
     if 'Reencoded Variants' in recording and 'iPhone' in recording['Reencoded Variants']:
       title = recording['info']['recording title']
