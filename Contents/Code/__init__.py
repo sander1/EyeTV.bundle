@@ -33,8 +33,7 @@ def Start():
 
 ####################################################################################################
 def MainMenu():
-#  oc = ObjectContainer(no_cache=True)
-  oc = ObjectContainer()
+  oc = ObjectContainer(no_cache=True)
 
   try:
     url = BuildUrl(STATUS_URL)
@@ -46,8 +45,8 @@ def MainMenu():
       oc.header = TITLE
       oc.message = 'EyeTV is not running'
   except:
-#    oc.header = 'Error'
-#    oc.message = 'Can\'t connect to EyeTV'
+    oc.header = 'Error'
+    oc.message = 'Can\'t connect to EyeTV'
     pass
 
   oc.add(PrefsObject(title='Preferences', thumb=R(ICON_PREFS)))
@@ -56,8 +55,7 @@ def MainMenu():
 
 ####################################################################################################
 def Live():
-#  oc = ObjectContainer(no_cache=True, view_group='List')
-  oc = ObjectContainer(view_group='List')
+  oc = ObjectContainer(no_cache=True, view_group='List')
   url = BuildUrl(CHANNELS_URL)
 
   for channel in JSON.ObjectFromURL(url, headers=DaaHeader(url))['channelList']:
