@@ -29,5 +29,12 @@
     "type":"enum",
     "values":["320", "720", "1500", "2000"],
     "default":"1500"
+  },
+  {
+    "id":"passcode",
+    "label":"Passcode",
+    "type":"text",
+    "option":"hidden",
+    "default":""
   }
 ]
